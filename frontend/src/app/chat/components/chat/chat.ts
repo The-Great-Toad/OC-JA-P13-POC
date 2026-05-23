@@ -14,6 +14,11 @@ export class Chat {
   
   public username = signal<string>('');
   public messageContent = signal<string>('');
+  public isOpen = signal<boolean>(false);
+
+  toggleChat() {
+    this.isOpen.update(v => !v);
+  }
 
   joinChat() {
     if (this.username().trim()) {
@@ -24,12 +29,13 @@ export class Chat {
   sendMessage() {
     if (this.messageContent().trim()) {
       this.chatService.sendMessage(this.messageContent());
-      this.messageContent.set(''); // Clear input
+      this.messageContent.set('');
     }
   }
 
   leaveChat() {
     this.chatService.disconnect();
     this.username.set('');
+    this.isOpen.set(false);
   }
 }

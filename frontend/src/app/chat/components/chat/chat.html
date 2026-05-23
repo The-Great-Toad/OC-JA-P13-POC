@@ -1,32 +1,52 @@
-﻿<section class="chat-container" aria-label="Support Chat">
+﻿<!-- Bouton flottant pour ouvrir/fermer le chat -->
+<button class="chat-bubble-btn" (click)="toggleChat()" [attr.aria-expanded]="isOpen()"
+        aria-label="Ouvrir le chat de support">
+    @if (isOpen()) {
+    <span aria-hidden="true">✕</span>
+    } @else {
+    <span aria-hidden="true">💬</span>
+    }
+</button>
+
+@if (isOpen()) {
+<section class="chat-widget" aria-label="Support Chat">
     @if (!chatService.isConnected()) {
     <form class="join-screen" (ngSubmit)="joinChat()">
-        <h2>Your Car Your Way - Support</h2>
+        <h2>Your Car Your Way</h2>
+        <p>Besoin d'aide ? Discutez avec notre support !</p>
 
-        <!-- Label masqué visuellement mais lu par les lecteurs d'écran -->
         <label for="usernameInput" class="visually-hidden">Entrez votre nom</label>
         <input id="usernameInput" type="text" name="username" [(ngModel)]="username"
-               placeholder="Entrez votre nom..." required />
-        <button type="submit" [disabled]="!username().trim()">Rejoindre</button>
+               placeholder="Votre pseudo..." required />
+        <button type="submit" [disabled]="!username().trim()">Démarrer le chat</button>
     </form>
     } @else {
     <article class="chat-screen">
         <header class="chat-header">
-            <h3>Connecté : {{ chatService.currentUser() }}</h3>
-            <button type="button" aria-label="Quitter le chat"
-                    (click)="leaveChat()">Quitter</button>
+            <div class="user-info">
+                <span class="status-dot"></span>
+                <h3>{{ chatService.currentUser() }}</h3>
+            </div>
+            <button type="button" aria-label="Quitter le chat" (click)="leaveChat()"
+                    title="Se déconnecter">
+                Sortir
+            </button>
         </header>
 
         <main class="chat-messages" role="log" aria-live="polite">
             <ul>
                 @for (msg of chatService.messages(); track $index) {
-                <li class="message" [class.system]="msg.type !== 'CHAT'">
+                <li class="message" [class.system]="msg.type !== 'CHAT'"
+                    [class.own-message]="msg.sender === chatService.currentUser()">
                     @if (msg.type === 'JOIN') {
                     <em>{{ msg.sender }} a rejoint la discussion.</em>
                     } @else if (msg.type === 'LEAVE') {
                     <em>{{ msg.sender }} a quitté la discussion.</em>
                     } @else {
-                    <strong>{{ msg.sender }}:</strong> {{ msg.content }}
+                    @if (msg.sender !== chatService.currentUser()) {
+                    <strong>{{ msg.sender }}</strong>
+                    }
+                    <div class="bubble">{{ msg.content }}</div>
                     }
                 </li>
                 }
@@ -36,9 +56,11 @@
         <form class="chat-input" (ngSubmit)="sendMessage()">
             <label for="messageInput" class="visually-hidden">Taper un message</label>
             <input id="messageInput" type="text" name="messageContent" [(ngModel)]="messageContent"
-                   placeholder="Taper un message..." required autocomplete="off" />
-            <button type="submit" [disabled]="!messageContent().trim()">Envoyer</button>
+                   placeholder="Votre message..." required autocomplete="off" />
+            <button type="submit" [disabled]="!messageContent().trim()"
+                    aria-label="Envoyer">➤</button>
         </form>
     </article>
     }
 </section>
+}

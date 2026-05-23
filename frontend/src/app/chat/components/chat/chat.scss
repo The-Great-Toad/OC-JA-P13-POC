@@ -1,16 +1,16 @@
 ﻿:host {
   --primary-color: #2c3e50;
-  --secondary-color: #eef2f5;
-  --accent-color: #3498db;
-  --system-text-color: #7f8c8d;
-  --border-color: #dcdde1;
+  --secondary-color: #f8f9fa;
+  --accent-color: #27ae60;
+  --accent-hover: #2196f3;
+  --system-text-color: #95a5a6;
+  --border-color: #ecf0f1;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
-  --border-radius: 8px;
+  --border-radius: 12px;
 }
 
-/* Classe utilitaire d'accessibilité */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -22,49 +22,100 @@
   border: 0;
 }
 
-.chat-container {
-  max-width: 40rem;
-  margin: var(--spacing-lg) auto;
+/* Le bouton bulle flottant */
+.chat-bubble-btn {
+  position: fixed;
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 10000;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    transform: scale(1.05);
+    background-color: var(--accent-hover);
+  }
+}
+
+/* Le widget chat modal */
+.chat-widget {
+  position: fixed;
+  bottom: calc(var(--spacing-lg) + 75px);
+  right: var(--spacing-lg);
+  width: 360px;
+  max-width: calc(100vw - 2 * var(--spacing-lg));
+  background-color: white;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
   font-family: system-ui, -apple-system, sans-serif;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
   h2, h3 {
-    margin-top: 0;
+    margin: 0;
     color: var(--primary-color);
   }
 }
 
-.join-screen, .chat-input {
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Écran de connexion */
+.join-screen {
+  padding: var(--spacing-lg);
   display: flex;
+  flex-direction: column;
   gap: var(--spacing-md);
-  
+  text-align: center;
+
+  p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+  }
+
   input {
-    flex: 1;
-    padding: var(--spacing-sm);
+    padding: 0.75rem;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 1rem;
     &:focus { 
       outline: 2px solid var(--accent-color);
       border-color: transparent;
     }
   }
-  
+
   button {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 0.75rem;
     background-color: var(--accent-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-    transition: opacity 0.2s, background-color 0.2s;
+    transition: opacity 0.2s;
     
     &:disabled {
       background-color: var(--border-color);
+      color: #bdc3c7;
       cursor: not-allowed;
     }
     
@@ -74,39 +125,61 @@
   }
 }
 
+/* En-tête du chat une fois connecté */
 .chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-md);
-  padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--secondary-color);
-  
+  padding: var(--spacing-md);
+  background-color: var(--primary-color);
+  color: white;
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    h3 {
+      color: white;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #2ecc71;
+      border-radius: 50%;
+    }
+  }
+
   button {
     background: transparent;
-    color: #e74c3c;
-    border: 1px solid #e74c3c;
+    color: #ecf0f1;
+    border: 1px solid #7f8c8d;
     padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
     cursor: pointer;
     border-radius: 4px;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease;
+
     &:hover { 
       background: #e74c3c; 
-      color: white; 
+      color: white;
+      border-color: #e74c3c;
     }
   }
 }
 
+/* Zone des messages */
 .chat-messages {
-  height: 25rem;
+  height: 350px;
   overflow-y: auto;
   background-color: var(--secondary-color);
-  border-radius: 4px;
   padding: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
 
   ul {
-    list-style: none;
+    list-style: none; 
     padding: 0;
     margin: 0;
     display: flex;
@@ -115,18 +188,92 @@
   }
 
   .message {
-    padding: var(--spacing-sm);
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    align-self: flex-start;
+
+    &.own-message {
+      align-self: flex-end;
+      .bubble {
+        background-color: var(--accent-color);
+        color: white;
+        border-bottom-right-radius: 2px;
+        border-bottom-left-radius: 12px;
+      }
+    }
+
+    strong {
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      margin-bottom: 2px;
+      margin-left: 2px;
+    }
+
+    .bubble {
+      padding: 0.5rem 0.8rem;
+      background: white;
+      border-radius: 12px;
+      border-bottom-left-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      line-height: 1.4;
+      font-size: 0.95rem;
+      word-wrap: break-word;
+    }
 
     &.system {
-      background: transparent;
-      box-shadow: none;
-      color: var(--system-text-color);
-      font-size: 0.9em;
-      text-align: center;
+      align-self: center;
+      max-width: 100%;
+      .bubble {
+        display: none;
+      }
+      em {
+        background: transparent;
+        color: var(--system-text-color);
+        font-size: 0.85em;
+      }
+    }
+  }
+}
+
+/* Input zone en bas */
+.chat-input {
+  display: flex;
+  padding: var(--spacing-md);
+  background-color: white;
+  border-top: 1px solid var(--border-color);
+  
+  input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.95rem;
+    background-color: var(--secondary-color);
+
+    &:focus { 
+      outline: none;
+      border-color: var(--accent-color);
+      background-color: white;
+    }
+  }
+  
+  button {
+    background: transparent;
+    color: var(--accent-color);
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0 0.5rem 0 1rem;
+    transition: transform 0.2s;
+    
+    &:disabled {
+      color: var(--border-color);
+      cursor: not-allowed;
+    }
+    
+    &:not(:disabled):hover {
+      transform: scale(1.1);
     }
   }
 }
