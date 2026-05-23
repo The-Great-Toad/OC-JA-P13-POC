@@ -1,0 +1,44 @@
+﻿<section class="chat-container" aria-label="Support Chat">
+    @if (!chatService.isConnected()) {
+    <form class="join-screen" (ngSubmit)="joinChat()">
+        <h2>Your Car Your Way - Support</h2>
+
+        <!-- Label masqué visuellement mais lu par les lecteurs d'écran -->
+        <label for="usernameInput" class="visually-hidden">Entrez votre nom</label>
+        <input id="usernameInput" type="text" name="username" [(ngModel)]="username"
+               placeholder="Entrez votre nom..." required />
+        <button type="submit" [disabled]="!username().trim()">Rejoindre</button>
+    </form>
+    } @else {
+    <article class="chat-screen">
+        <header class="chat-header">
+            <h3>Connecté : {{ chatService.currentUser() }}</h3>
+            <button type="button" aria-label="Quitter le chat"
+                    (click)="leaveChat()">Quitter</button>
+        </header>
+
+        <main class="chat-messages" role="log" aria-live="polite">
+            <ul>
+                @for (msg of chatService.messages(); track $index) {
+                <li class="message" [class.system]="msg.type !== 'CHAT'">
+                    @if (msg.type === 'JOIN') {
+                    <em>{{ msg.sender }} a rejoint la discussion.</em>
+                    } @else if (msg.type === 'LEAVE') {
+                    <em>{{ msg.sender }} a quitté la discussion.</em>
+                    } @else {
+                    <strong>{{ msg.sender }}:</strong> {{ msg.content }}
+                    }
+                </li>
+                }
+            </ul>
+        </main>
+
+        <form class="chat-input" (ngSubmit)="sendMessage()">
+            <label for="messageInput" class="visually-hidden">Taper un message</label>
+            <input id="messageInput" type="text" name="messageContent" [(ngModel)]="messageContent"
+                   placeholder="Taper un message..." required autocomplete="off" />
+            <button type="submit" [disabled]="!messageContent().trim()">Envoyer</button>
+        </form>
+    </article>
+    }
+</section>
