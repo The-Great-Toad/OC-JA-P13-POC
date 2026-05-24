@@ -1,4 +1,5 @@
-﻿import { Injectable, signal, DestroyRef, inject } from '@angular/core';
+﻿import { Injectable, signal, DestroyRef, inject, isDevMode } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { RxStomp } from '@stomp/rx-stomp';
 import { Subscription } from 'rxjs';
@@ -21,7 +22,7 @@ export class ChatService {
   }
   connect(username: string, role: RoleType) {
     if (role === 'SUPPORT') {
-      this.http.get<ChatMessage[]>('http://localhost:8080/api/chat/history').subscribe({
+      this.http.get<ChatMessage[]>(`${environment.apiUrl}/chat/history`).subscribe({
         next: (history) => {
           this.messages.set(history);
         },
@@ -32,10 +33,8 @@ export class ChatService {
     }
 
     this.rxStomp.configure({
-      brokerURL: 'ws://localhost:8080/ws',
-      debug: (msg: string) => {
-        console.log(new Date(), msg);
-      },
+      brokerURL: environment.wsUrl,
+      debug: isDevMode() ? (msg: string) => console.log(new Date(), msg) : undefined,
     });
     this.rxStomp.activate();
     this.isConnected.set(true);
@@ -73,6 +72,17 @@ export class ChatService {
       });
     }
   }
+  closeConversation() {
+    const user = this.currentUser();
+    const role = this.currentRole();
+    if (user) {
+      this.rxStomp.publish({
+        destination: '/app/chat.sendMessage',
+        body: JSON.stringify({ sender: user, type: MessageType.CLOSE, role: role, content: '' }),
+      });
+    }
+  }
+
   disconnect() {
     if (this.isConnected()) {
       this.rxStomp.publish({

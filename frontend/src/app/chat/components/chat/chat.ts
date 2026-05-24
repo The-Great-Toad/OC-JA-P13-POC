@@ -1,7 +1,16 @@
-﻿import { Component, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
+﻿import {
+  Component,
+  inject,
+  signal,
+  ViewChild,
+  ElementRef,
+  effect,
+  afterNextRender,
+  Injector,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../services/chat';
-import { RoleType } from '../../models/chat-message';
+import { MessageType, RoleType } from '../../models/chat-message';
 
 @Component({
   selector: 'app-chat',
@@ -12,6 +21,7 @@ import { RoleType } from '../../models/chat-message';
 })
 export class Chat {
   public chatService = inject(ChatService);
+  private injector = inject(Injector);
 
   public username = signal<string>('');
   public selectedRole = signal<RoleType>('CLIENT');
@@ -30,7 +40,7 @@ export class Chat {
       if (messages.length > this.previousMessageCount) {
         // Détection de la clôture
         const lastMessage = messages[messages.length - 1];
-        if (lastMessage.content === 'La conversation a été clôturée par le support.') {
+        if (lastMessage.type === MessageType.CLOSE) {
           this.isClosed.set(true);
         }
 
@@ -58,12 +68,15 @@ export class Chat {
   }
 
   private scrollToBottom(): void {
-    setTimeout(() => {
-      if (this.myScrollContainer) {
-        this.myScrollContainer.nativeElement.scrollTop =
-          this.myScrollContainer.nativeElement.scrollHeight;
-      }
-    }, 50);
+    afterNextRender(
+      () => {
+        if (this.myScrollContainer) {
+          this.myScrollContainer.nativeElement.scrollTop =
+            this.myScrollContainer.nativeElement.scrollHeight;
+        }
+      },
+      { injector: this.injector },
+    );
   }
 
   joinChat() {
@@ -96,7 +109,7 @@ export class Chat {
 
   cloturerChat() {
     if (window.confirm('Confirmez-vous la clôture de cette conversation ?')) {
-      this.chatService.sendMessage('La conversation a été clôturée par le support.');
+      this.chatService.closeConversation();
       setTimeout(() => {
         this.leaveChat();
       }, 500);

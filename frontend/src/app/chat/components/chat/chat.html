@@ -68,9 +68,11 @@
                     [class.own-message]="msg.sender === chatService.currentUser()"
                     [class.support-message]="msg.role === 'SUPPORT' && msg.type === 'CHAT' && msg.sender !== chatService.currentUser()">
                     @if (msg.type === 'JOIN') {
-                    <em>{{ msg.sender }} a rejoint la discussion.</em>
+                    <em>{{ msg.sender }} a rejoint la conversation.</em>
                     } @else if (msg.type === 'LEAVE') {
                     <em>{{ msg.sender }} a quitté la conversation.</em>
+                    } @else if (msg.type === 'CLOSE') {
+                    <em>La conversation a été clôturée.</em>
                     } @else {
                     @if (msg.sender !== chatService.currentUser()) {
                     <strong>

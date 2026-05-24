@@ -8,6 +8,7 @@ public record ChatMessage(MessageType type, String content, String sender, Strin
     public enum MessageType {
         CHAT,
         JOIN,
-        LEAVE
+        LEAVE,
+        CLOSE
     }
 }

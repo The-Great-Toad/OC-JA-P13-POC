@@ -2,6 +2,7 @@
   CHAT = 'CHAT',
   JOIN = 'JOIN',
   LEAVE = 'LEAVE',
+  CLOSE = 'CLOSE',
 }
 
 export type RoleType = 'CLIENT' | 'SUPPORT';
