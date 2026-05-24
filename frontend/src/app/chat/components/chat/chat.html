@@ -7,9 +7,12 @@
     @if (isOpen()) {
     <span aria-hidden="true">✕</span>
     } @else {
-    <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
-        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+        <path
+              d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z">
+        </path>
         <path d="M21 12v3a2 2 0 0 1-2 2 2 2 0 0 0-2 2 2 2 0 0 1-2 2h-4"></path>
     </svg>
     }
@@ -21,6 +24,16 @@
     <form class="join-screen" (ngSubmit)="joinChat()">
         <h2>Your Car Your Way</h2>
         <p>Besoin d'aide ? Discutez avec notre support !</p>
+
+        <div class="role-selector">
+            <label>
+                <input type="radio" name="role" [(ngModel)]="selectedRole" value="CLIENT"> Client
+            </label>
+            <label>
+                <input type="radio" name="role" [(ngModel)]="selectedRole" value="SUPPORT"> Support
+                (Admin)
+            </label>
+        </div>
 
         <label for="usernameInput" class="visually-hidden">Entrez votre nom</label>
         <input id="usernameInput" type="text" name="username" [(ngModel)]="username"
@@ -44,14 +57,20 @@
             <ul>
                 @for (msg of chatService.messages(); track $index) {
                 <li class="message" [class.system]="msg.type !== 'CHAT'"
-                    [class.own-message]="msg.sender === chatService.currentUser()">
+                    [class.own-message]="msg.sender === chatService.currentUser()"
+                    [class.support-message]="msg.role === 'SUPPORT' && msg.type === 'CHAT' && msg.sender !== chatService.currentUser()">
                     @if (msg.type === 'JOIN') {
                     <em>{{ msg.sender }} a rejoint la discussion.</em>
                     } @else if (msg.type === 'LEAVE') {
-                    <em>{{ msg.sender }} a quitté la discussion.</em>
+                    <em>{{ msg.sender }} a fermé la discussion.</em>
                     } @else {
                     @if (msg.sender !== chatService.currentUser()) {
-                    <strong>{{ msg.sender }}</strong>
+                    <strong>
+                        {{ msg.sender }}
+                        @if (msg.role === 'SUPPORT') {
+                        <span class="support-badge" title="Agent de support">🛡️</span>
+                        }
+                    </strong>
                     }
                     <div class="bubble">{{ msg.content }}</div>
                     }

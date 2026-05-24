@@ -1,6 +1,7 @@
 ﻿import { Component, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../services/chat';
+import { RoleType } from '../../models/chat-message';
 
 @Component({
   selector: 'app-chat',
@@ -13,6 +14,7 @@ export class Chat {
   public chatService = inject(ChatService);
 
   public username = signal<string>('');
+  public selectedRole = signal<RoleType>('CLIENT');
   public messageContent = signal<string>('');
   public isOpen = signal<boolean>(false);
   public unreadCount = signal<number>(0);
@@ -26,7 +28,10 @@ export class Chat {
       const messages = this.chatService.messages();
       if (messages.length > this.previousMessageCount) {
         if (!this.isOpen()) {
-          this.unreadCount.update((c) => c + (messages.length - this.previousMessageCount));
+          const newMessagesCount = messages.slice(this.previousMessageCount).filter(m => m.type === 'CHAT').length;
+          if (newMessagesCount > 0) {
+            this.unreadCount.update((c) => c + newMessagesCount);
+          }
         } else {
           this.scrollToBottom();
         }
@@ -54,7 +59,7 @@ export class Chat {
 
   joinChat() {
     if (this.username().trim()) {
-      this.chatService.connect(this.username());
+      this.chatService.connect(this.username(), this.selectedRole());
     }
   }
 
@@ -66,6 +71,12 @@ export class Chat {
   }
 
   leaveChat() {
+    if (this.selectedRole() === 'CLIENT') {
+      const confirmLeave = window.confirm("Souhaitez-vous vraiment quitter le chat ? Votre historique de conversation sera perdu.");
+      if (!confirmLeave) {
+        return;
+      }
+    }
     this.chatService.disconnect();
     this.username.set('');
     this.isOpen.set(false);

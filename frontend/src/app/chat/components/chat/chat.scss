@@ -116,6 +116,19 @@
     font-size: 0.9rem;
   }
 
+  .role-selector {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    background: var(--secondary-color);
+    border-radius: 6px;
+    label {
+      cursor: pointer;
+    }
+  }
+
   input {
     padding: 0.75rem;
     border: 1px solid var(--border-color);
@@ -228,6 +241,18 @@
         border-bottom-right-radius: 2px;
         border-bottom-left-radius: 12px;
       }
+    }
+
+    &.support-message {
+      .bubble {
+        background-color: #34495e;
+        color: white;
+      }
+    }
+
+    .support-badge {
+      font-size: 0.9em;
+      margin-left: 2px;
     }
 
     strong {
