@@ -28,7 +28,9 @@ export class Chat {
       const messages = this.chatService.messages();
       if (messages.length > this.previousMessageCount) {
         if (!this.isOpen()) {
-          const newMessagesCount = messages.slice(this.previousMessageCount).filter(m => m.type === 'CHAT').length;
+          const newMessagesCount = messages
+            .slice(this.previousMessageCount)
+            .filter((m) => m.type === 'CHAT').length;
           if (newMessagesCount > 0) {
             this.unreadCount.update((c) => c + newMessagesCount);
           }
@@ -72,7 +74,9 @@ export class Chat {
 
   leaveChat() {
     if (this.selectedRole() === 'CLIENT') {
-      const confirmLeave = window.confirm("Souhaitez-vous vraiment quitter le chat ? Votre historique de conversation sera perdu.");
+      const confirmLeave = window.confirm(
+        'Souhaitez-vous vraiment quitter le chat ? Votre historique de conversation sera perdu.',
+      );
       if (!confirmLeave) {
         return;
       }
