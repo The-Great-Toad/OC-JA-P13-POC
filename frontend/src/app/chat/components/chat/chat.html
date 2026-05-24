@@ -47,10 +47,18 @@
                 <span class="status-dot"></span>
                 <h3>{{ chatService.currentUser() }}</h3>
             </div>
-            <button type="button" aria-label="Quitter le chat" (click)="leaveChat()"
-                    title="Se déconnecter">
-                Sortir
-            </button>
+            <div class="header-actions">
+                @if (chatService.currentRole() === 'SUPPORT') {
+                <button type="button" aria-label="Clôturer le ticket" (click)="cloturerChat()"
+                        title="Marquer comme résolu">
+                    Clôturer
+                </button>
+                }
+                <button type="button" aria-label="Quitter le chat" (click)="leaveChat()"
+                        title="Quitter la conversation">
+                    Quitter
+                </button>
+            </div>
         </header>
 
         <main class="chat-messages" role="log" aria-live="polite" #scrollMe>
@@ -62,7 +70,7 @@
                     @if (msg.type === 'JOIN') {
                     <em>{{ msg.sender }} a rejoint la discussion.</em>
                     } @else if (msg.type === 'LEAVE') {
-                    <em>{{ msg.sender }} a fermé la discussion.</em>
+                    <em>{{ msg.sender }} a quitté la conversation.</em>
                     } @else {
                     @if (msg.sender !== chatService.currentUser()) {
                     <strong>
@@ -82,8 +90,9 @@
         <form class="chat-input" (ngSubmit)="sendMessage()">
             <label for="messageInput" class="visually-hidden">Taper un message</label>
             <input id="messageInput" type="text" name="messageContent" [(ngModel)]="messageContent"
-                   placeholder="Votre message..." required autocomplete="off" />
-            <button type="submit" [disabled]="!messageContent().trim()"
+                   placeholder="Votre message..." required autocomplete="off"
+                   [disabled]="isClosed()" />
+            <button type="submit" [disabled]="!messageContent().trim() || isClosed()"
                     aria-label="Envoyer">➤</button>
         </form>
     </article>

@@ -18,6 +18,7 @@ export class Chat {
   public messageContent = signal<string>('');
   public isOpen = signal<boolean>(false);
   public unreadCount = signal<number>(0);
+  public isClosed = signal<boolean>(false);
 
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
 
@@ -27,6 +28,12 @@ export class Chat {
     effect(() => {
       const messages = this.chatService.messages();
       if (messages.length > this.previousMessageCount) {
+        // Détection de la clôture
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.content === 'La conversation a été clôturée par le support.') {
+          this.isClosed.set(true);
+        }
+
         if (!this.isOpen()) {
           const newMessagesCount = messages
             .slice(this.previousMessageCount)
@@ -61,6 +68,7 @@ export class Chat {
 
   joinChat() {
     if (this.username().trim()) {
+      this.isClosed.set(false);
       this.chatService.connect(this.username(), this.selectedRole());
     }
   }
@@ -84,5 +92,14 @@ export class Chat {
     this.chatService.disconnect();
     this.username.set('');
     this.isOpen.set(false);
+  }
+
+  cloturerChat() {
+    if (window.confirm('Confirmez-vous la clôture de cette conversation ?')) {
+      this.chatService.sendMessage('La conversation a été clôturée par le support.');
+      setTimeout(() => {
+        this.leaveChat();
+      }, 500);
+    }
   }
 }
