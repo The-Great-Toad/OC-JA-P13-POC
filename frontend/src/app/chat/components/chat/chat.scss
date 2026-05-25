@@ -99,7 +99,7 @@
 
   p {
     margin: 0;
-    color: #7f8c8d;
+    color: var(--muted-color);
     font-size: 0.9rem;
   }
 
@@ -173,7 +173,7 @@
     .status-dot {
       width: 8px;
       height: 8px;
-      background-color: #2ecc71;
+      background-color: var(--status-online-color);
       border-radius: 50%;
     }
   }
@@ -185,7 +185,7 @@
     button {
       background: transparent;
       color: #ecf0f1;
-      border: 1px solid #7f8c8d;
+      border: 1px solid var(--muted-color);
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
       font-size: 0.8rem;
@@ -193,9 +193,9 @@
       transition: all 0.2s ease;
 
       &:hover {
-        background: #e74c3c;
+        background: var(--danger-color);
         color: white;
-        border-color: #e74c3c;
+        border-color: var(--danger-color);
       }
     }
   }
@@ -249,7 +249,7 @@
 
     strong {
       font-size: 0.8rem;
-      color: #7f8c8d;
+      color: var(--muted-color);
       margin-bottom: 2px;
       margin-left: 2px;
     }
@@ -271,7 +271,7 @@
       .bubble {
         display: none;
       }
-      em {
+      .system-message {
         background: transparent;
         color: var(--system-text-color);
         font-size: 0.85em;

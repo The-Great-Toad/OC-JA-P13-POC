@@ -11,21 +11,8 @@
 	<groupId>com.yourcaryourway</groupId>
 	<artifactId>backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<name>YourCarYourWay - Chat PoC</name>
+	<description>Preuve de Concept - Module Chat temps réel (WebSocket/STOMP)</description>
 	<properties>
 		<java.version>21</java.version>
 	</properties>
@@ -53,6 +40,10 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 
