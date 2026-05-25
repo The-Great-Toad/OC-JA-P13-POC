@@ -15,11 +15,13 @@ export class ChatService {
   public isConnected = signal<boolean>(false);
   public currentUser = signal<string | null>(null);
   public currentRole = signal<RoleType>('CLIENT');
+
   constructor() {
     this.destroyRef.onDestroy(() => {
       this.disconnect();
     });
   }
+
   connect(username: string, role: RoleType) {
     if (role === 'SUPPORT') {
       this.http.get<ChatMessage[]>(`${environment.apiUrl}/chat/history`).subscribe({
@@ -56,6 +58,7 @@ export class ChatService {
       body: JSON.stringify({ sender: username, type: MessageType.JOIN, role: role }),
     });
   }
+
   sendMessage(content: string) {
     const user = this.currentUser();
     const role = this.currentRole();
@@ -66,12 +69,14 @@ export class ChatService {
         type: MessageType.CHAT,
         role: role,
       };
+
       this.rxStomp.publish({
         destination: '/app/chat.sendMessage',
         body: JSON.stringify(chatMessage),
       });
     }
   }
+
   closeConversation() {
     const user = this.currentUser();
     const role = this.currentRole();
@@ -93,10 +98,12 @@ export class ChatService {
           role: this.currentRole(),
         }),
       });
+
       if (this.topicSubscription) {
         this.topicSubscription.unsubscribe();
         this.topicSubscription = undefined;
       }
+
       this.rxStomp.deactivate();
       this.isConnected.set(false);
       this.currentUser.set(null);

@@ -1,17 +1,4 @@
-﻿:host {
-  --primary-color: #2c3e50;
-  --secondary-color: #f8f9fa;
-  --accent-color: #27ae60;
-  --accent-hover: #2196f3;
-  --system-text-color: #95a5a6;
-  --border-color: #ecf0f1;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --border-radius: 12px;
-}
-
-.visually-hidden {
+﻿.visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -30,7 +17,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: var(--accent-color);
+  background-color: var(--primary-color);
   color: white;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -46,14 +33,14 @@
 
   &:hover {
     transform: scale(1.05);
-    background-color: var(--accent-hover);
+    background-color: var(--primary-hover);
   }
 
   .badge {
     position: absolute;
     top: -5px;
     right: -5px;
-    background-color: #e74c3c;
+    background-color: var(--accent-color);
     color: white;
     font-size: 0.8rem;
     font-weight: bold;
@@ -119,9 +106,9 @@
   .role-selector {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: var(--spacing-md);
     font-size: 0.9rem;
-    padding: 0.5rem;
+    padding: var(--spacing-sm);
     background: var(--secondary-color);
     border-radius: 6px;
     label {
@@ -250,7 +237,7 @@
 
     &.support-message {
       .bubble {
-        background-color: #34495e;
+        background-color: var(--primary-color);
         color: white;
       }
     }

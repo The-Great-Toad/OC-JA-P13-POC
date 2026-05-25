@@ -5,7 +5,8 @@ import { Chat } from './chat/components/chat/chat';
   selector: 'app-root',
   standalone: true,
   imports: [Chat],
-  template: '<app-chat></app-chat>',
+  templateUrl: './app.html',
+  styleUrls: ['./app.scss'],
 })
 export class AppComponent {
   title = 'frontend';

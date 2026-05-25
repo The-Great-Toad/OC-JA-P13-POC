@@ -1,1 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  /* ── Palette de marque Your Car Your Way ── */
+  --color-brand-blue: #1e3770;
+  --color-brand-orange: #e84018;
+
+  /* ── Tokens sémantiques ── */
+  --primary-color: var(--color-brand-blue);
+  --primary-hover: #162a59;
+  --secondary-color: #f8f9fa;
+  --accent-color: var(--color-brand-orange);
+  --accent-hover: #c73510;
+  --system-text-color: #95a5a6;
+  --border-color: #ecf0f1;
+
+  /* ── Espacements & formes ── */
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --border-radius: 12px;
+}
