@@ -85,6 +85,16 @@ CREATE TABLE vehicle_category (
     description TEXT NOT NULL
 );
 
+-- Table de Grille Tarifaire (Catalogue des prix)
+CREATE TABLE pricing_grid (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vehicle_category_code VARCHAR(4) NOT NULL REFERENCES vehicle_category(acriss_code) ON DELETE CASCADE,
+    base_daily_rate DECIMAL(10, 2) NOT NULL,
+    currency_code VARCHAR(3) NOT NULL DEFAULT 'EUR' REFERENCES currency(code),
+    effective_from TIMESTAMPTZ NOT NULL,
+    effective_to TIMESTAMPTZ -- Nullable : si null = tarif actuel en vigueur indéfiniment
+);
+
 -- Table des Réservations
 CREATE TABLE reservation (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -193,6 +203,7 @@ COMMENT ON TABLE client IS 'Profil métier du client final, lié à app_user par
 COMMENT ON TABLE agency IS 'Liste des agences de location Your Car Your Way.';
 COMMENT ON TABLE promo_code IS 'Codes promotionnels applicables lors de la réservation. S''ils sont liés à un client (anniversaire) le client_id est défini, sinon c''est global.';
 COMMENT ON TABLE vehicle_category IS 'Référentiel des catégories de véhicules basé sur le standard international ACRISS.';
+COMMENT ON TABLE pricing_grid IS 'Catalogue des prix séparé en 3NF. Les tarifs sont liés à une catégorie et à une période de validité.';
 COMMENT ON TABLE reservation IS 'Table centrale métier gérant le cycle de vie d''une location de véhicule.';
 COMMENT ON TABLE payment IS 'Suivi des paiements et remboursements associés aux réservations. Mêle Stripe et paiements sur place.';
 COMMENT ON TABLE deposit IS 'Gère les cautions isolément, permettant de suivre les retenues, libérations ou encaissements dissociés du paiement.';
