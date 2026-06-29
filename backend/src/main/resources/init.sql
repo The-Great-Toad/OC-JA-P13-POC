@@ -102,14 +102,15 @@ CREATE TABLE vehicle (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table de Grille Tarifaire (Catalogue des prix)
-CREATE TABLE pricing_grid (
+-- Table des Offres (Catalogue tarifaire par catégorie et par agence)
+CREATE TABLE offer (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     vehicle_category_code VARCHAR(4) NOT NULL REFERENCES vehicle_category(acriss_code) ON DELETE CASCADE,
+    agency_id UUID NOT NULL REFERENCES agency(id) ON DELETE CASCADE,
     base_daily_rate DECIMAL(10, 2) NOT NULL,
     currency_code VARCHAR(3) NOT NULL DEFAULT 'EUR' REFERENCES currency(code),
     effective_from TIMESTAMPTZ NOT NULL,
-    effective_to TIMESTAMPTZ -- Nullable : si null = tarif actuel en vigueur indéfiniment
+    effective_to TIMESTAMPTZ -- Nullable : si null = offre en vigueur indéfiniment
 );
 
 -- Table des Réservations
@@ -119,6 +120,7 @@ CREATE TABLE reservation (
     pickup_agency_id UUID NOT NULL REFERENCES agency(id),
     return_agency_id UUID NOT NULL REFERENCES agency(id),
     vehicle_category_code VARCHAR(4) NOT NULL REFERENCES vehicle_category(acriss_code),
+    offer_id UUID REFERENCES offer(id) ON DELETE SET NULL,   -- Offre tarifaire source (traçabilité du calcul de prix) — SET NULL si l'offre est archivée
     vehicle_id UUID REFERENCES vehicle(id),                  -- Nullable : assigné à la confirmation/prise en charge par l'agence Legacy via l'API
     promo_code VARCHAR(50) REFERENCES promo_code(code),
     pickup_time TIMESTAMPTZ NOT NULL,
@@ -216,6 +218,10 @@ CREATE INDEX idx_vehicle_status ON vehicle(status);
 CREATE INDEX idx_vehicle_home_agency ON vehicle(home_agency_id);
 CREATE INDEX idx_vehicle_current_agency ON vehicle(current_agency_id);
 CREATE INDEX idx_reservation_vehicle ON reservation(vehicle_id);
+-- Index Offres
+CREATE INDEX idx_offer_vehicle_category ON offer(vehicle_category_code);
+CREATE INDEX idx_offer_agency ON offer(agency_id);
+CREATE INDEX idx_reservation_offer ON reservation(offer_id);
 
 -- Commentaires de tables et de colonnes pour la documentation (Data Dictionary)
 -- Tables
@@ -228,7 +234,7 @@ COMMENT ON TABLE agency IS 'Liste des agences de location Your Car Your Way.';
 COMMENT ON TABLE promo_code IS 'Codes promotionnels applicables lors de la réservation. S''ils sont liés à un client (anniversaire) le client_id est défini, sinon c''est global.';
 COMMENT ON TABLE vehicle_category IS 'Référentiel des catégories de véhicules basé sur le standard international ACRISS.';
 COMMENT ON TABLE vehicle IS 'Flotte physique des véhicules de Your Car Your Way. Chaque enregistrement représente un véhicule individuel identifié par son immatriculation. Les applications Legacy des agences maintiennent à jour le statut et l''agence courante via l''API IYCYW (opérations CRUD standard).';
-COMMENT ON TABLE pricing_grid IS 'Catalogue des prix séparé en 3NF. Les tarifs sont liés à une catégorie et à une période de validité.';
+COMMENT ON TABLE offer IS 'Catalogue des offres de location : tarif journalier de base par catégorie de véhicule (ACRISS) et par agence. Classe d''association entre VEHICLE_CATEGORY et AGENCY.';
 COMMENT ON TABLE reservation IS 'Table centrale métier gérant le cycle de vie d''une location de véhicule.';
 COMMENT ON TABLE payment IS 'Suivi des paiements et remboursements associés aux réservations. Mêle Stripe et paiements sur place.';
 COMMENT ON TABLE deposit IS 'Gère les cautions isolément, permettant de suivre les retenues, libérations ou encaissements dissociés du paiement.';
@@ -242,11 +248,15 @@ COMMENT ON COLUMN app_user.role IS 'Rôle du compte : CLIENT (client final), SUP
 COMMENT ON COLUMN client.stripe_customer_id IS 'Jeton (Token) sécurisé Stripe pour la facturation, évitant de stocker la carte (conformité PCI-DSS).';
 COMMENT ON COLUMN client.language_code IS 'Langue préférée de l''utilisateur, utile pour l''envoi d''emails et l''édition des factures.';
 COMMENT ON COLUMN promo_code.country_code IS 'Si renseigné, restreint l''utilisation du code promotionnel à ce pays uniquement.';
+COMMENT ON COLUMN offer.agency_id IS 'Agence de départ concernée par ce tarif. Dimension internationale : un même SUV a un tarif différent selon la localisation de l''agence.';
+COMMENT ON COLUMN offer.effective_from IS 'Date de début de validité de l''offre (gestion de la saisonnalité).';
+COMMENT ON COLUMN offer.effective_to IS 'Date de fin de validité de l''offre. NULL = offre en vigueur indéfiniment.';
+COMMENT ON COLUMN reservation.offer_id IS 'Référence de l''offre tarifaire utilisée comme base de calcul lors de la création de la réservation. Nullable (SET NULL) : l''offre peut être archivée sans invalider les réservations historiques. Assure la traçabilité du prix figé dans total_price.';
 COMMENT ON COLUMN reservation.vehicle_id IS 'Véhicule physique spécifique assigné à cette réservation. Nullable : le client réserve une catégorie (vehicle_category_code) en ligne ; le véhicule individuel est assigné le jour J par l''agence via l''API IYCYW. L''assignation utilise SELECT FOR UPDATE pour garantir l''unicité (anti double-booking ACID).';
 COMMENT ON COLUMN reservation.currency_code IS 'Devise utilisée pour cette réservation. Crucial pour gérer l''internationalisation des paiements.';
 COMMENT ON COLUMN reservation.payment_option IS 'Choix du client : payer en ligne (PREPAID) ou en agence (PAY_ON_ARRIVAL).';
-COMMENT ON COLUMN deposit.status IS 'État de la caution : HELD (retenue), RELEASED (relâchée), CAPTURED (encaissée suite à dommages).';
 COMMENT ON COLUMN reservation.status IS 'État métier de la réservation : PENDING, CONFIRMED, CANCELLED, COMPLETED.';
+COMMENT ON COLUMN deposit.status IS 'État de la caution : HELD (retenue), RELEASED (relâchée), CAPTURED (encaissée suite à dommages).';
 COMMENT ON COLUMN payment.payment_method IS 'Moyen réel utilisé : STRIPE_ONLINE, ON_SITE_CARD, ON_SITE_CASH.';
 COMMENT ON COLUMN payment.stripe_payment_intent_id IS 'Référence de transaction unique générée par Stripe. Peut être nulle si payé physiquement au comptoir.';
 COMMENT ON COLUMN invoice.type IS 'Nature comptable du document : STANDARD (facture), REFUND (avoir), CANCELLATION_FEE (frais d''annulation).';
